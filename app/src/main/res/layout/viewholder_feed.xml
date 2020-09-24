@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ravypark.cyberwrecker.ui.dashboard.DashboardViewModel" />
+
+        <variable
+            name="feed"
+            type="com.ravypark.cyberwrecker.data.Feed" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        onSingleClick="@{() -> viewModel.clickEvent(feed)}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="7dp">
+
+        <ImageView
+            loadImage="@{feed.image}"
+            android:scaleType="centerCrop"
+            android:id="@+id/image"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:contentDescription="@string/feed_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:text="@{feed.title}"
+            android:id="@+id/title"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintLeft_toRightOf="@+id/image"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/desc"
+            style="@style/TextAppearance.AppCompat.Caption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="5dp"
+            app:layout_constraintLeft_toRightOf="@+id/image"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            android:text="@{feed.desc}"
+            tools:text="클리앙 · 댓글 10개 · 조회 10회 · 추천 10개 · 10분 전" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
