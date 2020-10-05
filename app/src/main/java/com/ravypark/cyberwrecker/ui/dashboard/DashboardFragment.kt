@@ -5,21 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.browser.browseractions.BrowserActionsIntent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
+import com.firebase.ui.firestore.paging.LoadingState
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.Feed
+import com.ravypark.cyberwrecker.utils.EventObserver
+import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_dashboard.view.*
 
 
@@ -61,15 +61,25 @@ class DashboardFragment : Fragment() {
         }
         root.feed_list.addItemDecoration(deco)
 
+        root.refresh.setOnRefreshListener {
+            adapter.refresh()
+        }
+
         return root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        dashboardViewModel.clickEvent.observe(viewLifecycleOwner, {
+        dashboardViewModel.clickEvent.observe(viewLifecycleOwner, EventObserver {
             CustomTabsIntent.Builder()
                 .build().launchUrl(requireContext(), Uri.parse(it.url))
+        })
+
+        dashboardViewModel.loadingState.observe(viewLifecycleOwner, {
+            if (it == LoadingState.LOADED) {
+                refresh.isRefreshing = false
+            }
         })
     }
 }
