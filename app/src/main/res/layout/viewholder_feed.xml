@@ -17,7 +17,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         onSingleClick="@{() -> viewModel.clickEvent(feed)}"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="115dp"
         android:background="?android:attr/selectableItemBackground"
         android:padding="15dp">
 

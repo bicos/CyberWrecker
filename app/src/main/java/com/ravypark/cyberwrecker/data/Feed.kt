@@ -3,8 +3,6 @@ package com.ravypark.cyberwrecker.data
 import android.text.format.DateUtils
 import com.google.firebase.firestore.IgnoreExtraProperties
 import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
 
 @IgnoreExtraProperties
 data class Feed(
@@ -25,6 +23,7 @@ data class Feed(
     val url: String = "",
     val viewCnt: Int = 0
 ) {
+
     fun getImage() = if (images.isNullOrEmpty()) null else images.first()
 
     fun getItemId(): String = "${bbsId}_${postId}"
@@ -32,16 +31,8 @@ data class Feed(
     fun getDesc(): String {
         var desc = cpName
 
-        if (likeCnt > 0) {
-            desc += " · 추천 ${String.format("%,d",likeCnt)}"
-        }
-
         if (viewCnt > 0) {
             desc += " · 조회수 ${String.format("%,d",viewCnt)}"
-        }
-
-        if (replyCnt > 0) {
-            desc += " · 댓글 ${String.format("%,d",replyCnt)}"
         }
 
         if (scrappedAt.isNotEmpty()) {
@@ -63,6 +54,3 @@ data class Feed(
         return ""
     }
 }
-
-const val DEFAULT_DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ" //2020-05-28T18:00:00+09:00
-val DEFAULT_DATE_FORMAT = SimpleDateFormat(DEFAULT_DATE_FORMAT_PATTERN, Locale.KOREA)

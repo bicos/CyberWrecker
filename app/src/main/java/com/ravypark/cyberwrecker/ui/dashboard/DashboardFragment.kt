@@ -52,7 +52,7 @@ class DashboardFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        root.feed_list.adapter = this.adapter
+        root.feed_list.setHasFixedSize(true)
 
         val deco = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL).apply {
             ContextCompat.getDrawable(requireContext(), R.drawable.divider_feed_list)?.let {
@@ -63,6 +63,10 @@ class DashboardFragment : Fragment() {
 
         root.refresh.setOnRefreshListener {
             adapter.refresh()
+        }
+
+        root.filter.setOnClickListener {
+
         }
 
         return root
@@ -81,5 +85,9 @@ class DashboardFragment : Fragment() {
                 refresh.isRefreshing = false
             }
         })
+
+        dashboardViewModel.start {
+            feed_list.adapter = this.adapter
+        }
     }
 }
