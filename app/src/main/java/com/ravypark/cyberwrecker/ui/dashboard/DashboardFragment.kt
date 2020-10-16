@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -40,7 +41,7 @@ class DashboardFragment : Fragment() {
 
         val options = FirestorePagingOptions.Builder<Feed>()
             .setLifecycleOwner(this)
-            .setQuery(dashboardViewModel.getQuery("scrappedAt"), config, Feed::class.java)
+            .setQuery(dashboardViewModel.getQuery("createdAt"), config, Feed::class.java)
             .build()
 
         adapter = FeedListAdapter(options, dashboardViewModel)
@@ -66,7 +67,7 @@ class DashboardFragment : Fragment() {
         }
 
         root.filter.setOnClickListener {
-
+            FilterCpFragment().show(childFragmentManager, "filter_cp")
         }
 
         return root
@@ -81,9 +82,21 @@ class DashboardFragment : Fragment() {
         })
 
         dashboardViewModel.loadingState.observe(viewLifecycleOwner, {
-            if (it == LoadingState.LOADED) {
+            if (it == LoadingState.LOADED || it == LoadingState.ERROR) {
                 refresh.isRefreshing = false
+                if (it == LoadingState.ERROR) {
+                    Toast.makeText(requireContext(), "일시적으로 서비스를 이용할 수 없습니다.", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
+        })
+
+        dashboardViewModel.deleteSuccessEvent.observe(viewLifecycleOwner, EventObserver {
+            Toast.makeText(requireContext(), "문서 삭제를 성공하였습니다.", Toast.LENGTH_SHORT).show()
+        })
+
+        dashboardViewModel.deleteFailureEvent.observe(viewLifecycleOwner, EventObserver {
+            Toast.makeText(requireContext(), "문서 삭제를 실패하였습니다. (${it})", Toast.LENGTH_SHORT).show()
         })
 
         dashboardViewModel.start {

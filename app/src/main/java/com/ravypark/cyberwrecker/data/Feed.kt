@@ -35,19 +35,18 @@ data class Feed(
             desc += " · 조회수 ${String.format("%,d",viewCnt)}"
         }
 
-        if (scrappedAt.isNotEmpty()) {
-            desc += " · ${getTime()}"
+        if (createdAt.isNotEmpty()) {
+            desc += getTime()
         }
 
         return desc
     }
 
     private fun getTime(): String {
-        val sdf = DEFAULT_DATE_FORMAT
         try {
-            val time = sdf.parse(scrappedAt)?.time ?: System.currentTimeMillis()
+            val time = DEFAULT_DATE_FORMAT.parse(createdAt)?.time ?: System.currentTimeMillis()
             val now = System.currentTimeMillis()
-            return DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS).toString()
+            return " · " + DateUtils.getRelativeTimeSpanString(time, now, DateUtils.MINUTE_IN_MILLIS).toString()
         } catch (e: ParseException) {
             e.printStackTrace()
         }
