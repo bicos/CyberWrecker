@@ -3,7 +3,6 @@ package com.ravypark.cyberwrecker.ui.dashboard
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.firestore.paging.LoadingState
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -17,13 +16,9 @@ class DashboardViewModel : ViewModel() {
 
     val clickEvent = MutableLiveData<Event<Feed>>()
 
-    val deleteSuccessEvent = MutableLiveData<Event<Void>>()
-
-    val deleteFailureEvent = MutableLiveData<Event<Exception>>()
-
     val loadingState: MutableLiveData<LoadingState> = MutableLiveData()
 
-    private val collection = Firebase.firestore.collection("docs")
+    private val collection = Firebase.firestore.collection("docs_v2")
 
     private val config = Firebase.remoteConfig.apply {
         val configSettings = remoteConfigSettings {
@@ -48,13 +43,5 @@ class DashboardViewModel : ViewModel() {
 
     fun clickEvent(feed: Feed) {
         clickEvent.postValue(Event(feed))
-    }
-
-    fun deleteClick(feed: Feed) {
-        collection.document(feed.getItemId()).delete().addOnSuccessListener {
-            deleteSuccessEvent.postValue(Event(it))
-        }.addOnFailureListener {
-            deleteFailureEvent.postValue(Event(it))
-        }
     }
 }

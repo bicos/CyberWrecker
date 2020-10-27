@@ -91,14 +91,6 @@ class DashboardFragment : Fragment() {
             }
         })
 
-        dashboardViewModel.deleteSuccessEvent.observe(viewLifecycleOwner, EventObserver {
-            Toast.makeText(requireContext(), "문서 삭제를 성공하였습니다.", Toast.LENGTH_SHORT).show()
-        })
-
-        dashboardViewModel.deleteFailureEvent.observe(viewLifecycleOwner, EventObserver {
-            Toast.makeText(requireContext(), "문서 삭제를 실패하였습니다. (${it})", Toast.LENGTH_SHORT).show()
-        })
-
         dashboardViewModel.start {
             feed_list.adapter = this.adapter
         }
