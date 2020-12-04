@@ -1,10 +1,13 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
+import androidx.arch.core.util.Function
+import androidx.lifecycle.Observer
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -13,13 +16,22 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.ContentProvider
 import com.ravypark.cyberwrecker.databinding.ViewholderFilterCpBinding
+import com.ravypark.cyberwrecker.utils.EventObserver
 import kotlinx.android.synthetic.main.fragment_filter_cp.view.*
 
 class FilterCpFragment : BottomSheetDialogFragment() {
 
     lateinit var adapter: FilterCpAdapter
 
-    private val viewModel: FilterCpViewModel by viewModels { ViewModelProvider.NewInstanceFactory() }
+    private lateinit var viewModel: FilterCpViewModel
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(
+            requireActivity().application
+        ).create(FilterCpViewModel::class.java)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,27 +39,34 @@ class FilterCpFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_filter_cp, container, false)
-        adapter = FilterCpAdapter()
+        adapter = FilterCpAdapter(viewModel)
         view.list_filter_cp.adapter = adapter
-        adapter.submitList(viewModel.getConfigs())
+
+        Transformations.map(viewModel.filterCpChangedEvent) {
+            viewModel.mapFilterCps(it.peekContent())
+        }.observe(viewLifecycleOwner, Observer {
+            adapter.submitList(it)
+        })
+
         return view
     }
 }
 
-class FilterCpAdapter : ListAdapter<ContentProvider, FilterCpViewHolder>(DIFF_CALLBACK) {
+class FilterCpAdapter(private val filterCpViewModel: FilterCpViewModel) :
+    ListAdapter<FilterCpItemViewModel, FilterCpViewHolder>(DIFF_CALLBACK) {
 
     companion object {
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ContentProvider>() {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<FilterCpItemViewModel>() {
             override fun areItemsTheSame(
-                oldItem: ContentProvider,
-                newItem: ContentProvider
+                oldItem: FilterCpItemViewModel,
+                newItem: FilterCpItemViewModel
             ): Boolean {
-                return oldItem.id == newItem.id
+                return oldItem.cp.id == newItem.cp.id
             }
 
             override fun areContentsTheSame(
-                oldItem: ContentProvider,
-                newItem: ContentProvider
+                oldItem: FilterCpItemViewModel,
+                newItem: FilterCpItemViewModel
             ): Boolean {
                 return oldItem == newItem
             }
@@ -62,15 +81,18 @@ class FilterCpAdapter : ListAdapter<ContentProvider, FilterCpViewHolder>(DIFF_CA
     }
 
     override fun onBindViewHolder(holder: FilterCpViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(filterCpViewModel, getItem(position))
     }
 }
 
 class FilterCpViewHolder(private val binding: ViewholderFilterCpBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(cp: ContentProvider) {
-        binding.board = cp
+    fun bind(viewModel: FilterCpViewModel, itemViewModel: FilterCpItemViewModel) {
+        binding.viewModel = viewModel
+        binding.itemViewModel = itemViewModel
         binding.executePendingBindings()
     }
 }
+
+data class FilterCpItemViewModel(val cp: ContentProvider, var isChecked: Boolean)

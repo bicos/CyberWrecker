@@ -1,7 +1,9 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -17,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
+import com.google.firebase.firestore.Query
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.Feed
 import com.ravypark.cyberwrecker.utils.EventObserver
@@ -28,7 +32,17 @@ class DashboardFragment : Fragment() {
 
     private val dashboardViewModel: DashboardViewModel by viewModels { ViewModelProvider.NewInstanceFactory() }
 
+    private lateinit var filterCpViewModel: FilterCpViewModel
+
     private lateinit var adapter: FirestorePagingAdapter<Feed, FeedListViewHolder>
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        filterCpViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(
+            requireActivity().application
+        ).create(FilterCpViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +55,12 @@ class DashboardFragment : Fragment() {
 
         val options = FirestorePagingOptions.Builder<Feed>()
             .setLifecycleOwner(this)
-            .setQuery(dashboardViewModel.getQuery("createdAt"), config, Feed::class.java)
+            .setQuery(
+                dashboardViewModel.collection.orderBy(
+                    "createdAt",
+                    Query.Direction.DESCENDING
+                ), config, Feed::class.java
+            )
             .build()
 
         adapter = FeedListAdapter(options, dashboardViewModel)
@@ -76,12 +95,36 @@ class DashboardFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        filterCpViewModel.filterCpChangedEvent.observe(viewLifecycleOwner, EventObserver {
+            val config = PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setPrefetchDistance(5)
+                .setPageSize(30)
+                .build()
+
+            var query: Query = dashboardViewModel.collection
+
+            if (it.isNotEmpty()) {
+                Log.i("test", "cps : ${it.toList()}")
+                query = query.whereNotIn("cp", it.toList()).orderBy("cp")
+            }
+
+            query = query.orderBy("createdAt", Query.Direction.DESCENDING)
+
+            val options = FirestorePagingOptions.Builder<Feed>()
+                .setLifecycleOwner(this)
+                .setQuery(query, config, Feed::class.java)
+                .build()
+
+            adapter.updateOptions(options)
+        })
+
         dashboardViewModel.clickEvent.observe(viewLifecycleOwner, EventObserver {
             CustomTabsIntent.Builder()
                 .build().launchUrl(requireContext(), Uri.parse(it.url))
         })
 
-        dashboardViewModel.loadingState.observe(viewLifecycleOwner, {
+        dashboardViewModel.loadingState.observe(viewLifecycleOwner, Observer {
             if (it == LoadingState.LOADED || it == LoadingState.ERROR) {
                 refresh.isRefreshing = false
                 if (it == LoadingState.ERROR) {

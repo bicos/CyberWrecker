@@ -6,8 +6,5 @@ data class ContentProvider(
     val id: String,
     val cp: String,
     @SerializedName("cp_name")
-    val cpName: String,
-    @SerializedName("bbs_name")
-    val bbsName: String,
-    var isEnable: Boolean = true
+    val cpName: String
 )

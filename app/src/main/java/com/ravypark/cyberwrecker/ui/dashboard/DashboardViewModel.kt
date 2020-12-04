@@ -3,7 +3,7 @@ package com.ravypark.cyberwrecker.ui.dashboard
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.firestore.paging.LoadingState
-import com.google.firebase.firestore.Query
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -18,7 +18,7 @@ class DashboardViewModel : ViewModel() {
 
     val loadingState: MutableLiveData<LoadingState> = MutableLiveData()
 
-    private val collection = Firebase.firestore.collection("docs_v2")
+    val collection = Firebase.firestore.collection("docs_v2")
 
     private val config = Firebase.remoteConfig.apply {
         val configSettings = remoteConfigSettings {
@@ -35,10 +35,6 @@ class DashboardViewModel : ViewModel() {
         config.fetchAndActivate().addOnCompleteListener {
             callback.invoke()
         }
-    }
-
-    fun getQuery(orderBy: String): Query {
-        return collection.orderBy(orderBy, Query.Direction.DESCENDING)
     }
 
     fun clickEvent(feed: Feed) {
