@@ -106,7 +106,7 @@ class DashboardFragment : Fragment() {
 
             if (it.isNotEmpty()) {
                 Log.i("test", "cps : ${it.toList()}")
-                query = query.whereNotIn("cp", it.toList()).orderBy("cp")
+                query = query.whereIn("cp", it.toList())
             }
 
             query = query.orderBy("createdAt", Query.Direction.DESCENDING)
