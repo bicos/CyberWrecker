@@ -1,56 +1,44 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
-import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
-import androidx.lifecycle.AndroidViewModel
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.gson.Gson
 import com.ravypark.cyberwrecker.data.*
 import com.ravypark.cyberwrecker.utils.Event
 
-class FilterCpViewModel(app: Application) : AndroidViewModel(app) {
-
-    private val config = Firebase.remoteConfig
-
-    private val pref = (getApplication() as Context).getAppPreferences()
+class FilterCpViewModel @ViewModelInject constructor(
+    private val pref: SharedPreferences,
+    private val repo: ContentProviderRepository
+) : ViewModel() {
 
     val filterCpChangedEvent = MutableLiveData<Event<Set<String>>>()
 
     private val prefChangedListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == KEY_FILTER_CP) {
-                filterCpChangedEvent.value = Event(pref.getFilterCps())
+                filterCpChangedEvent.value = Event(repo.getFilterCps())
             }
         }
 
     init {
         pref.registerOnSharedPreferenceChangeListener(prefChangedListener)
-        filterCpChangedEvent.value = Event(pref.getFilterCps())
+        filterCpChangedEvent.value = Event(repo.getFilterCps())
     }
 
     fun clickItem(cp: ContentProvider) {
-        val filterCps = pref.getFilterCps()
+        val filterCps = repo.getFilterCps()
         if (filterCps.contains(cp.cp)) {
-            pref.removeFilterCp(cp.cp)
+            repo.removeCp(cp.cp)
         } else {
-            pref.addFilterCp(cp.cp)
+            repo.addCp(cp.cp)
         }
     }
 
     fun mapFilterCps(filterCps: Set<String>): List<FilterCpItemViewModel> {
-        val configs = getConfigs()
-        return configs.map {
+        return repo.getRemoteCps().map {
             FilterCpItemViewModel(it, filterCps.contains(it.cp))
         }
-    }
-
-    private fun getConfigs(): List<ContentProvider> {
-        val json = config.getString("config")
-        return Gson().fromJson(json, Array<ContentProvider>::class.java).toList()
     }
 
     override fun onCleared() {

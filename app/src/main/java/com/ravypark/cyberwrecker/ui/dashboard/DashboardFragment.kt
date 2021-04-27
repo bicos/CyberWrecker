@@ -1,6 +1,5 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -24,25 +22,18 @@ import com.google.firebase.firestore.Query
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.Feed
 import com.ravypark.cyberwrecker.utils.EventObserver
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import kotlinx.android.synthetic.main.fragment_dashboard.view.*
 
-
+@AndroidEntryPoint
 class DashboardFragment : Fragment() {
 
-    private val dashboardViewModel: DashboardViewModel by viewModels { ViewModelProvider.NewInstanceFactory() }
+    private val dashboardViewModel: DashboardViewModel by viewModels()
 
-    private lateinit var filterCpViewModel: FilterCpViewModel
+    private val filterCpViewModel: FilterCpViewModel by viewModels()
 
     private lateinit var adapter: FirestorePagingAdapter<Feed, FeedListViewHolder>
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        filterCpViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(
-            requireActivity().application
-        ).create(FilterCpViewModel::class.java)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
