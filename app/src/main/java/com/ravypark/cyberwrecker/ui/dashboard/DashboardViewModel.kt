@@ -1,6 +1,5 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.firestore.paging.LoadingState
@@ -11,8 +10,11 @@ import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.Feed
 import com.ravypark.cyberwrecker.utils.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class DashboardViewModel @ViewModelInject constructor(
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
     private val config: FirebaseRemoteConfig
 ) : ViewModel() {
 

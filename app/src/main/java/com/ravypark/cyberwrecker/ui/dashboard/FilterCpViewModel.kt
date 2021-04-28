@@ -1,13 +1,17 @@
 package com.ravypark.cyberwrecker.ui.dashboard
 
 import android.content.SharedPreferences
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ravypark.cyberwrecker.data.*
+import com.ravypark.cyberwrecker.data.ContentProvider
+import com.ravypark.cyberwrecker.data.ContentProviderRepository
+import com.ravypark.cyberwrecker.data.KEY_FILTER_CP
 import com.ravypark.cyberwrecker.utils.Event
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class FilterCpViewModel @ViewModelInject constructor(
+@HiltViewModel
+class FilterCpViewModel  @Inject constructor(
     private val pref: SharedPreferences,
     private val repo: ContentProviderRepository
 ) : ViewModel() {

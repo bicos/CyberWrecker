@@ -21,10 +21,9 @@ import com.firebase.ui.firestore.paging.LoadingState
 import com.google.firebase.firestore.Query
 import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.Feed
+import com.ravypark.cyberwrecker.databinding.FragmentDashboardBinding
 import com.ravypark.cyberwrecker.utils.EventObserver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_dashboard.*
-import kotlinx.android.synthetic.main.fragment_dashboard.view.*
 
 @AndroidEntryPoint
 class DashboardFragment : Fragment() {
@@ -34,6 +33,8 @@ class DashboardFragment : Fragment() {
     private val filterCpViewModel: FilterCpViewModel by viewModels()
 
     private lateinit var adapter: FirestorePagingAdapter<Feed, FeedListViewHolder>
+
+    private var binding: FragmentDashboardBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,30 +62,36 @@ class DashboardFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        root.feed_list.setHasFixedSize(true)
+    ): View {
+        binding = FragmentDashboardBinding.inflate(inflater)
+        binding?.feedList?.let {
+            setupRecyclerView(it)
+        }
+
+        binding?.refresh?.setOnRefreshListener {
+            adapter.refresh()
+        }
+
+        binding?.filter?.setOnClickListener {
+            FilterCpFragment().show(childFragmentManager, "filter_cp")
+        }
+
+        return binding!!.root
+    }
+
+    private fun setupRecyclerView(feedList: RecyclerView) {
+        feedList.setHasFixedSize(true)
 
         val deco = DividerItemDecoration(requireContext(), RecyclerView.VERTICAL).apply {
             ContextCompat.getDrawable(requireContext(), R.drawable.divider_feed_list)?.let {
                 setDrawable(it)
             }
         }
-        root.feed_list.addItemDecoration(deco)
-
-        root.refresh.setOnRefreshListener {
-            adapter.refresh()
-        }
-
-        root.filter.setOnClickListener {
-            FilterCpFragment().show(childFragmentManager, "filter_cp")
-        }
-
-        return root
+        feedList.addItemDecoration(deco)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         filterCpViewModel.filterCpChangedEvent.observe(viewLifecycleOwner, EventObserver {
             val config = PagedList.Config.Builder()
@@ -115,9 +122,9 @@ class DashboardFragment : Fragment() {
                 .build().launchUrl(requireContext(), Uri.parse(it.url))
         })
 
-        dashboardViewModel.loadingState.observe(viewLifecycleOwner, Observer {
+        dashboardViewModel.loadingState.observe(viewLifecycleOwner, {
             if (it == LoadingState.LOADED || it == LoadingState.ERROR) {
-                refresh.isRefreshing = false
+                binding?.refresh?.isRefreshing = false
                 if (it == LoadingState.ERROR) {
                     Toast.makeText(requireContext(), "일시적으로 서비스를 이용할 수 없습니다.", Toast.LENGTH_SHORT)
                         .show()
@@ -126,7 +133,7 @@ class DashboardFragment : Fragment() {
         })
 
         dashboardViewModel.start {
-            feed_list.adapter = this.adapter
+            binding?.feedList?.adapter = this.adapter
         }
     }
 }

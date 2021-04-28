@@ -10,11 +10,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.ravypark.cyberwrecker.R
 import com.ravypark.cyberwrecker.data.ContentProvider
+import com.ravypark.cyberwrecker.databinding.FragmentFilterCpBinding
 import com.ravypark.cyberwrecker.databinding.ViewholderFilterCpBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.fragment_filter_cp.view.*
 
 @AndroidEntryPoint
 class FilterCpFragment : BottomSheetDialogFragment() {
@@ -27,17 +26,15 @@ class FilterCpFragment : BottomSheetDialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_filter_cp, container, false)
-
+    ): View {
+        val binding = FragmentFilterCpBinding.inflate(inflater, container, false)
         adapter = FilterCpAdapter(viewModel)
-        view.list_filter_cp.adapter = adapter
-
-        return view
+        binding.listFilterCp.adapter = adapter
+        return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         Transformations.map(viewModel.filterCpChangedEvent) {
             viewModel.mapFilterCps(it.peekContent())
