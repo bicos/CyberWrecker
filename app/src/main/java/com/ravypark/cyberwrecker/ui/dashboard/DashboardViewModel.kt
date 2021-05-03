@@ -43,6 +43,8 @@ class DashboardViewModel @Inject constructor(
         }.addOnFailureListener {
             loadingState.value = LoadingState.ERROR
         }
+
+        loadingState.value = LoadingState.LOADING_INITIAL
     }
 
     fun clickEvent(feed: Feed) {

@@ -120,11 +120,15 @@ class DashboardFragment : Fragment() {
         })
 
         dashboardViewModel.loadingState.observe(viewLifecycleOwner, {
-            if (it == LoadingState.LOADED || it == LoadingState.ERROR) {
-                binding?.refresh?.isRefreshing = false
-                if (it == LoadingState.ERROR) {
-                    Toast.makeText(requireContext(), "일시적으로 서비스를 이용할 수 없습니다.", Toast.LENGTH_SHORT)
-                        .show()
+            when (it) {
+                LoadingState.LOADING_INITIAL, LoadingState.LOADING_MORE -> binding?.refresh?.isRefreshing = true
+                LoadingState.FINISHED, LoadingState.LOADED -> binding?.refresh?.isRefreshing = false
+                LoadingState.ERROR -> {
+                    binding?.refresh?.isRefreshing = false
+                    if (it == LoadingState.ERROR) {
+                        Toast.makeText(requireContext(), "일시적으로 서비스를 이용할 수 없습니다.", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         })
